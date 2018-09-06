@@ -1,0 +1,19 @@
+{
+  "name": "keystore-insomnia-oidc-plus4u",
+  "version": "0.1.0",
+  "description": "CLI tool for managing access codes for insomnia-plugin-oidc-plus4u.",
+  "main": "index.js",
+  "repository": "https://github.com/jiridudekusy/keystore-insomnia-oidc-plus4u",
+  "license": "MIT",
+  "dependencies": {
+    "command-line-args": "^5.0.2",
+    "command-line-usage": "^5.0.5",
+    "keytar": "^4.2.1",
+    "r2": "^2.0.0",
+    "read": "^1.0.7"
+  },
+  "keywords": [
+    "insomnia",
+    "plus4u"
+  ]
+}
