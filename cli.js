@@ -1,15 +1,15 @@
+#!/usr/bin/env node
 const r2 = require("r2");
 const crypto = require("crypto");
 const {promisify} = require('util');
 const read = promisify(require("read"));
 const commandLineArgs = require("command-line-args");
 const commandLineUsage = require("command-line-usage");
-const mkdirp = promisify(require("mkdirp"));
+
 const path = require("path");
 const fs = require("fs");
 
 const homedir = require('os').homedir();
-const secureStoreLoc = path.join(homedir, ".insomnia-plugin-oidc-plus4u", "vault.data");
 const secureStore = require("./lib/securestore");
 
 let password;
@@ -31,19 +31,18 @@ async function testLogin(accessCode1, accessCode2) {
 }
 
 async function readSecureStore() {
-  if (!fs.existsSync(secureStoreLoc)) {
+  if (!secureStore.exists()) {
     console.log("Initializing secure store.");
-    mkdirp(path.dirname(secureStoreLoc));
     let password2;
     do {
       password = await read({prompt: `Secure store password : `, silent: true});
       password2 = await read({prompt: `Retype Secure store password : `, silent: true});
     } while (password !== password2);
-    await secureStore.write({}, password);
+    secureStore.write({}, password);
     return {};
   } else {
     password = await read({prompt: `Secure store password : `, silent: true});
-    return await secureStore.read(password);
+    return secureStore.read(password);
   }
 }
 
@@ -51,6 +50,7 @@ async function addUser(options) {
   let secureStoreCnt = await readSecureStore();
   let ac1 = await read({prompt: `Access code 1 for ${options.user} : `, silent: true});
   let ac2 = await read({prompt: `Access code 2 for ${options.user} : `, silent: true});
+  console.log("Trying to login using provided credentials...");
   if (await testLogin(ac1, ac2)) {
     console.log("Login has been sucessful.");
     secureStoreCnt[options.user] = {ac1, ac2};
@@ -61,19 +61,25 @@ async function addUser(options) {
   }
 }
 
+async function deleteUser(options) {
+  let secureStoreCnt = await readSecureStore();
+  secureStoreCnt[options.user] = null;
+  secureStore.write(secureStoreCnt, password);
+}
+
 const parametersdefinitions = [
   {
     name: "user",
     alias: "u",
     type: String,
-    typeLabel: "{user uid}",
-    description: "UID of user(human or uuEE)."
+    typeLabel: "{underline user uid}",
+    description: "UID of user(human or uuEE) or alias such as 'you'."
   },
   {
     name: "command",
     defaultOption: true,
     type: String,
-    description: "add | delete"
+    description: "add (adds user credentials to the vault) | delete (removes user credentials from the vault)"
   },
   {
     name: "help",
@@ -83,12 +89,39 @@ const parametersdefinitions = [
   }
 ];
 
-// const usage = commandLineUsage(sections);
+const sections = [
+  {
+    header: "oidc-plus4u-vault",
+    content: "Utility tool for maintaining AES-265 encrypted file with accessCodes to oidc.plus4u.net."
+  },
+  {
+    header: "Synopsis",
+    content: [
+      "oidc-plus4u-vault {underline parameters} {underline command}",
+      "oidc-plus4u-vault {bold --user} {underline user} add",
+      "oidc-plus4u-vault {bold --user} {underline user} delete",
+      "oidc-plus4u-vault {bold --help}"
+    ]
+  },
+  {
+    header: "Commands",
+    content: [
+      "{bold add} - adds user credentials to the vault",
+      "{bold delete} - removes user credentials from the vault",
+    ]
+  },
+  {
+    header: "Parameters",
+    optionList: parametersdefinitions.filter(p => p.name != "command")
+  }
+];
+
+const usage = commandLineUsage(sections);
 const options = commandLineArgs(parametersdefinitions);
 
-const valid = options.help || (options.user && options.command);
+const valid = options.help || (options.user && options.command && ["add","delete"].includes(options.command));
 if (!valid || options.help) {
-  console.log("Invalid");
+  console.log(usage);
   process.exit();
 }
 
