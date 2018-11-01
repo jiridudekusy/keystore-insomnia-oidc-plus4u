@@ -12,9 +12,11 @@ const fs = require("fs");
 const homedir = require('os').homedir();
 const secureStore = require("./lib/securestore");
 
+const DEFAULT_OIDC_SERVER = "https://oidc.plus4u.net/uu-oidcg01-main/0-0";
+
 let password;
 
-async function testLogin(accessCode1, accessCode2) {
+async function testLogin(accessCode1, accessCode2, oidcServer) {
   if (accessCode1.length === 0 || accessCode2.length === 0) {
     throw `Access code cannot be empty. Ignore this error for "Prompt ad-hoc".`;
   }
@@ -23,11 +25,21 @@ async function testLogin(accessCode1, accessCode2) {
     accessCode2,
     grant_type: "password"
   };
-  let resp = await r2.post("https://oidc.plus4u.net/uu-oidcg01-main/0-0/grantToken", {json: credentials}).json;
+  let tokenEndpointUrl = await getTokenEndpoint(oidcServer);
+  let resp = await r2.post(tokenEndpointUrl, {json: credentials}).json;
   if (Object.keys(resp.uuAppErrorMap).length > 0) {
     return false;
   }
   return true;
+}
+
+async function getTokenEndpoint(oidcServer) {
+  let oidcServerConfigUrl = (oidcServer || DEFAULT_OIDC_SERVER) + "/.well-known/openid-configuration";
+  let oidcConfig = await r2.get(oidcServerConfigUrl).json;
+  if (Object.keys(oidcConfig.uuAppErrorMap).length > 0) {
+    throw `Cannot get configuration of OIDC server on ${oidcServer}. Probably invalid URL.`;
+  }
+  return oidcConfig.token_endpoint;
 }
 
 async function readSecureStore() {
@@ -50,14 +62,15 @@ async function addUser(options) {
   let secureStoreCnt = await readSecureStore();
   let ac1 = await read({prompt: `Access code 1 for ${options.user} : `, silent: true});
   let ac2 = await read({prompt: `Access code 2 for ${options.user} : `, silent: true});
+  let oidcServer = options.url;
   console.log("Trying to login using provided credentials...");
-  if (await testLogin(ac1, ac2)) {
-    console.log("Login has been sucessful.");
-    secureStoreCnt[options.user] = {ac1, ac2};
+  if (await testLogin(ac1, ac2, oidcServer)) {
+    console.log("Login has been successful.");
+    secureStoreCnt[options.user] = {ac1, ac2, oidcServer};
     secureStore.write(secureStoreCnt, password);
-    console.log(`Access code 1 and Access code 2 for user ${options.user} has been sucessfully stored into secure store.`);
+    console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
   } else {
-    console.error("Cannot login to oidc.plus4u.net. Probabaly invalid combination of Access Code 1 and Access Code 2.");
+    console.error("Cannot login to oidc.plus4u.net. Probably invalid combination of Access Code 1 and Access Code 2.");
   }
 }
 
@@ -74,6 +87,12 @@ const parametersdefinitions = [
     type: String,
     typeLabel: "{underline user uid}",
     description: "UID of user(human or uuEE) or alias such as 'you'."
+  },  
+  {
+    name: "url",
+    type: String,
+    typeLabel: "{underline oidc url}",
+    description: "URL to the OIDC server. If not set, defaults to " + DEFAULT_OIDC_SERVER + "."
   },
   {
     name: "command",
@@ -98,7 +117,7 @@ const sections = [
     header: "Synopsis",
     content: [
       "oidc-plus4u-vault {underline parameters} {underline command}",
-      "oidc-plus4u-vault {bold --user} {underline user} add",
+      "oidc-plus4u-vault {bold --user} {underline user} [{bold --url} {underline oidc url}] add",
       "oidc-plus4u-vault {bold --user} {underline user} delete",
       "oidc-plus4u-vault {bold --help}"
     ]
