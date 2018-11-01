@@ -1,3 +1,8 @@
+0.3.0
+-----
+
+* Configurable URL to the OIDC server.
+
 0.2.2
 -----
 

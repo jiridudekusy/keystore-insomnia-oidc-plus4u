@@ -1,8 +1,8 @@
 {
   "name": "oidc-plus4u-vault",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "CLI tool for managing access codes for insomnia-plugin-oidc-plus4u.",
-  "main": "index.js",
+  "main": "cli.js",
   "repository": "https://github.com/jiridudekusy/keystore-insomnia-oidc-plus4u",
   "license": "MIT",
   "dependencies": {
