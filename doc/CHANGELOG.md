@@ -1,3 +1,8 @@
+0.3.1
+-----
+
+* remove keytar dependency. 
+
 0.3.0
 -----
 
