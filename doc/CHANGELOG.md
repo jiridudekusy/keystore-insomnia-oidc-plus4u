@@ -1,3 +1,8 @@
+0.3.2
+-----
+
+* add missing mkdirp dependency
+
 0.3.1
 -----
 
