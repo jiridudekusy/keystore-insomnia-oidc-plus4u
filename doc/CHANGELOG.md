@@ -1,3 +1,10 @@
+0.4.0
+-----
+
+* refactoring CLI interface.
+* add `ls` command.
+
+
 0.3.2
 -----
 
