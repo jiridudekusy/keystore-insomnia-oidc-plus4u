@@ -1,3 +1,8 @@
+0.4.2
+-----
+
+* Fix publication error.
+
 0.4.1
 -----
 
