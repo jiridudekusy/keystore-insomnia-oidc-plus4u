@@ -76,7 +76,7 @@ class AddTask {
 
   async _testLogin(accessCode1, accessCode2, oidcServer) {
     if (accessCode1.length === 0 || accessCode2.length === 0) {
-      throw `Access code cannot be empty. Ignore this error for "Prompt ad-hoc".`;
+      throw `Access code cannot be empty.`;
     }
     let credentials = {
       accessCode1,

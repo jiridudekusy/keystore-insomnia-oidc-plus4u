@@ -5,5 +5,5 @@ const vaultCli = require("./app/cli");
 vaultCli()
 .then(() => {
 }).catch(e => {
-  console.log(`Error in application : ${e.stack}`);
+  console.log(`Error in application : ${e} stacktrace: ${e.stack}`);
 });

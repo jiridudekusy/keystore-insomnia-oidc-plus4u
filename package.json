@@ -1,6 +1,6 @@
 {
   "name": "oidc-plus4u-vault",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "CLI tool for managing access codes for insomnia-plugin-oidc-plus4u.",
   "main": "lib/securestore.js",
   "repository": "https://github.com/jiridudekusy/keystore-insomnia-oidc-plus4u",
