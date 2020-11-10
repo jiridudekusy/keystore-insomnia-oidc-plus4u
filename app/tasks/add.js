@@ -4,7 +4,7 @@ const {promisify} = require('util');
 const read = promisify(require("read"));
 const r2 = require("r2");
 
-const DEFAULT_OIDC_SERVER = "https://oidc.plus4u.net/uu-oidcg01-main/0-0";
+const DEFAULT_OIDC_SERVER = "https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc";
 
 const optionsDefinitions = [
   {
