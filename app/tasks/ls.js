@@ -7,6 +7,12 @@ const optionsDefinitions = [
     alias: "h",
     type: Boolean,
     description: "Displays this usage guide."
+  },
+  {
+    name: "file",
+    alias: "f",
+    type: String,
+    description: "Path to vault file. This is useful if you want to manage project vault which other members of the team can import."
   }
 ];
 
@@ -36,7 +42,14 @@ class LsTask {
   async execute(cliArgs) {
     let options = this._taskUtils.parseCliArguments(cliArgs);
 
-    let secureStoreCliCommon = await SecureStoreCliCommon.init();
+    if (options.file) {
+      console.log(`Working with secure store on location ${options.file}`);
+    }else{
+      console.log(`Working with default secure store`);
+    }
+
+
+    let secureStoreCliCommon = await SecureStoreCliCommon.init(options.file);
     let secureStoreCnt = await secureStoreCliCommon.readSecureStore();
     let res = Object.keys(secureStoreCnt).filter(uid => secureStoreCnt[uid]).map(uid => {
       if (secureStoreCnt[uid].oidcServer) {

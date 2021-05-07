@@ -4,6 +4,7 @@ const commandLineUsage = require("command-line-usage");
 const AddTask = require("./tasks/add");
 const RmTask = require("./tasks/rm");
 const LsTask = require("./tasks/ls");
+const ImportTask = require("./tasks/import");
 
 const sections = [
   {
@@ -22,7 +23,8 @@ const sections = [
       { name: 'help', summary: 'Display this help.' },
       { name: 'add', summary: 'Stores user credentials to the vault.' },
       { name: 'ls', summary: 'List users in the vault.' },
-      { name: 'rm', summary: 'Removes user credentials from the vault.' }
+      { name: 'rm', summary: 'Removes user credentials from the vault.' },
+      { name: 'import', summary: 'Import credentials from external source file the vault.' }
     ]
   }
 ];
@@ -43,6 +45,8 @@ async function execute() {
     task = new RmTask(opts);
   } else if (mainOptions.command === "ls") {
     task = new LsTask(opts);
+  } else if (mainOptions.command === "import") {
+    task = new ImportTask(opts);
   }
 
   if (!task) {

@@ -1,4 +1,9 @@
 
+0.6.0
+-----
+- add `import` command
+- all commands(`add`, `ls`, `rm`) now supports external secure store
+
 0.5.0
 -----
 - use oidcg02(https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc) as default.
