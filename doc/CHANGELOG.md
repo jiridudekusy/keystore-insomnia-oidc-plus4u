@@ -1,3 +1,8 @@
+0.7.0
+-----
+- added `alias` option to the `add` command to specify aliases for the user on one import.
+- added support to import source vault from http url (e.g. uuBt) to `import` command using credentials from the default vault. 
+- added support to import access codes from text (plus4u mall) format to `import` command. Can be used to bulk load credentials for legacy apps. See [sample](./plus4uImportSample.txt). Pass `-t txt` to import this file type.
 
 0.6.0
 -----
