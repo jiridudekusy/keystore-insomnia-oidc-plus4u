@@ -1,10 +1,8 @@
 const TaskUtils = require("../misc/task-utils");
+const OidcClient = require("../misc/oidc-client");
 const SecureStoreCliCommon = require("../secure-store-cli-common");
 const {promisify} = require('util');
 const read = promisify(require("read"));
-const r2 = require("r2");
-
-const DEFAULT_OIDC_SERVER = "https://uuidentity.plus4u.net/uu-oidc-maing02/bb977a99f4cc4c37a2afce3fd599d0a7/oidc";
 
 const optionsDefinitions = [
   {
@@ -15,10 +13,18 @@ const optionsDefinitions = [
     description: "Default option. UID of user(human or uuEE) or alias such as 'you'."
   },
   {
+    name: "alias",
+    alias: "a",
+    type: String,
+    multiple: true,
+    typeLabel: "{underline alias for the user}",
+    description: "Optional alias for the user. The user will be stored under these alias as well. Multiple values supported."
+  },
+  {
     name: "url",
     type: String,
     typeLabel: "{underline oidc url}",
-    description: "URL to the OIDC server. If not set, defaults to " + DEFAULT_OIDC_SERVER + "."
+    description: "URL to the OIDC server. If not set, defaults to " + OidcClient.DEFAULT_OIDC_SERVER + "."
   },
   {
     name: "help",
@@ -63,10 +69,9 @@ class AddTask {
     this._taskUtils.testOption(options.user, "User is mandatory option.");
     if (options.file) {
       console.log(`Working with secure store on location ${options.file}`);
-    }else{
+    } else {
       console.log(`Working with default secure store`);
     }
-
 
     let secureStoreCliCommon = await SecureStoreCliCommon.init(options.file);
     let secureStoreCnt = await secureStoreCliCommon.readSecureStore();
@@ -76,42 +81,20 @@ class AddTask {
 
     let oidcServer = options.url;
     console.log("Trying to login using provided credentials...");
-    if (await this._testLogin(ac1, ac2, oidcServer)) {
+    if (await OidcClient.login(ac1, ac2, oidcServer)) {
       console.log("Login has been successful.");
       secureStoreCnt[options.user] = {ac1, ac2, oidcServer};
+      if (Array.isArray(options.alias)) {
+        for (const alias of options.alias) {
+          secureStoreCnt[alias] = {ac1, ac2, oidcServer};
+        }
+      }
       secureStoreCliCommon.writeSecureStore(secureStoreCnt);
       console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
     } else {
       console.error("Cannot login to oidc.plus4u.net. Probably invalid combination of Access Code 1 and Access Code 2.");
     }
   }
-
-  async _testLogin(accessCode1, accessCode2, oidcServer) {
-    if (accessCode1.length === 0 || accessCode2.length === 0) {
-      throw `Access code cannot be empty.`;
-    }
-    let credentials = {
-      accessCode1,
-      accessCode2,
-      grant_type: "password"
-    };
-    let tokenEndpointUrl = await this._getTokenEndpoint(oidcServer);
-    let resp = await r2.post(tokenEndpointUrl, {json: credentials}).json;
-    if (Object.keys(resp.uuAppErrorMap).length > 0) {
-      return false;
-    }
-    return true;
-  }
-
-  async _getTokenEndpoint(oidcServer) {
-    let oidcServerConfigUrl = (oidcServer || DEFAULT_OIDC_SERVER) + "/.well-known/openid-configuration";
-    let oidcConfig = await r2.get(oidcServerConfigUrl).json;
-    if (Object.keys(oidcConfig.uuAppErrorMap).length > 0) {
-      throw `Cannot get configuration of OIDC server on ${oidcServer}. Probably invalid URL.`;
-    }
-    return oidcConfig.token_endpoint;
-  }
-
 }
 
 module.exports = AddTask;
