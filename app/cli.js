@@ -5,6 +5,8 @@ const AddTask = require("./tasks/add");
 const RmTask = require("./tasks/rm");
 const LsTask = require("./tasks/ls");
 const ImportTask = require("./tasks/import");
+const updateNotifier = require('update-notifier');
+const pkg = require('../package.json');
 
 const sections = [
   {
@@ -29,7 +31,22 @@ const sections = [
   }
 ];
 
+const keypress = async () => {
+  process.stdin.setRawMode(true)
+  return new Promise(resolve => process.stdin.once('data', () => {
+    process.stdin.setRawMode(false)
+    process.stdin.pause()
+    resolve()
+  }))
+}
+
 async function execute() {
+  let notifier = updateNotifier({pkg});
+  if(notifier.update && process.stdout.isTTY && notifier.update.current != notifier.update.latest){
+    notifier.notify({isGlobal: true, defer: false});
+    console.log("Press any key to continue...");
+    await keypress();
+  }
 
   const mainDefinitions = [
     {name: 'command', defaultOption: true}

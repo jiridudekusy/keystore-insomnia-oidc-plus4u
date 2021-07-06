@@ -1,3 +1,7 @@
+0.8.0
+-----
+- add update notifier
+
 0.7.0
 -----
 - added `alias` option to the `add` command to specify aliases for the user on one import.
