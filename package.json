@@ -11,7 +11,8 @@
     "r2": "^2.0.0",
     "read": "^1.0.7",
     "mkdirp": "^0.5.1",
-    "n-readlines": "^1.0.1"
+    "n-readlines": "^1.0.1",
+    "zxcvbn": "^4.4.2"
   },
   "bin": {
     "oidc-plus4u-vault": "index.js"

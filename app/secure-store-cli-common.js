@@ -57,6 +57,10 @@ class SecureStoreCliCommon {
     secureStore.write(secureStoreCnt, this._password, this._secureStoreLoc);
   }
 
+  async checkPasswordStrength(password) {
+
+  }
+
 }
 
 module.exports = SecureStoreCliCommon;
