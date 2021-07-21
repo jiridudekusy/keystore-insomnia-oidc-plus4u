@@ -1,3 +1,7 @@
+0.9.0
+-----
+- add support for storing http basic auth crendentials (`--skiptTest` option id `add` command)
+
 0.8.0
 -----
 - add update notifier

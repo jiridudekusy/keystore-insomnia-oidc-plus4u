@@ -1,7 +1,7 @@
 const TaskUtils = require("../misc/task-utils");
 const OidcClient = require("../misc/oidc-client");
 const SecureStoreCliCommon = require("../secure-store-cli-common");
-const {promisify} = require('util');
+const { promisify } = require('util');
 const read = promisify(require("read"));
 
 const optionsDefinitions = [
@@ -19,6 +19,11 @@ const optionsDefinitions = [
     multiple: true,
     typeLabel: "{underline alias for the user}",
     description: "Optional alias for the user. The user will be stored under these alias as well. Multiple values supported."
+  },
+  {
+    name: "skipTest",
+    type: Boolean,
+    description: "Skip authentication test. Useful for storing keys for http basic auth."
   },
   {
     name: "url",
@@ -76,24 +81,30 @@ class AddTask {
     let secureStoreCliCommon = await SecureStoreCliCommon.init(options.file);
     let secureStoreCnt = await secureStoreCliCommon.readSecureStore();
 
-    let ac1 = await read({prompt: `Access code 1 for ${options.user} : `, silent: true});
-    let ac2 = await read({prompt: `Access code 2 for ${options.user} : `, silent: true});
+    let ac1 = await read({ prompt: `Access code 1 for ${options.user} : `, silent: true });
+    let ac2 = await read({ prompt: `Access code 2 for ${options.user} : `, silent: true });
 
-    let oidcServer = options.url;
-    console.log("Trying to login using provided credentials...");
-    if (await OidcClient.login(ac1, ac2, oidcServer)) {
-      console.log("Login has been successful.");
-      secureStoreCnt[options.user] = {ac1, ac2, oidcServer};
-      if (Array.isArray(options.alias)) {
-        for (const alias of options.alias) {
-          secureStoreCnt[alias] = {ac1, ac2, oidcServer};
+    if (!options.skipTest) {
+      let oidcServer = options.url;
+      console.log("Trying to login using provided credentials...");
+      if (await OidcClient.login(ac1, ac2, oidcServer)) {
+        console.log("Login has been successful.");
+        secureStoreCnt[options.user] = { ac1, ac2, oidcServer };
+        if (Array.isArray(options.alias)) {
+          for (const alias of options.alias) {
+            secureStoreCnt[alias] = { ac1, ac2, oidcServer };
+          }
         }
+        secureStoreCliCommon.writeSecureStore(secureStoreCnt);
+        console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
+      } else {
+        console.error("Cannot login to oidc.plus4u.net. Probably invalid combination of Access Code 1 and Access Code 2.");
       }
-      secureStoreCliCommon.writeSecureStore(secureStoreCnt);
+    }else{
+      console.log("Skip login test.");
       console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
-    } else {
-      console.error("Cannot login to oidc.plus4u.net. Probably invalid combination of Access Code 1 and Access Code 2.");
     }
+
   }
 }
 
