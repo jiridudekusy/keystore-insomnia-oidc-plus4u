@@ -83,28 +83,28 @@ class AddTask {
 
     let ac1 = await read({ prompt: `Access code 1 for ${options.user} : `, silent: true });
     let ac2 = await read({ prompt: `Access code 2 for ${options.user} : `, silent: true });
+    let oidcServer = options.url;
 
-    if (!options.skipTest) {
-      let oidcServer = options.url;
+    if (!options.skipTest) {      
       console.log("Trying to login using provided credentials...");
       if (await OidcClient.login(ac1, ac2, oidcServer)) {
         console.log("Login has been successful.");
-        secureStoreCnt[options.user] = { ac1, ac2, oidcServer };
-        if (Array.isArray(options.alias)) {
-          for (const alias of options.alias) {
-            secureStoreCnt[alias] = { ac1, ac2, oidcServer };
-          }
-        }
-        secureStoreCliCommon.writeSecureStore(secureStoreCnt);
-        console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
       } else {
         console.error("Cannot login to oidc.plus4u.net. Probably invalid combination of Access Code 1 and Access Code 2.");
+        return;
       }
     }else{
       console.log("Skip login test.");
-      console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
     }
 
+    secureStoreCnt[options.user] = { ac1, ac2, oidcServer };
+    if (Array.isArray(options.alias)) {
+      for (const alias of options.alias) {
+        secureStoreCnt[alias] = { ac1, ac2, oidcServer };
+      }
+    }
+    secureStoreCliCommon.writeSecureStore(secureStoreCnt);
+    console.log(`Access code 1 and Access code 2 for user ${options.user} has been successfully stored into secure store.`);
   }
 }
 

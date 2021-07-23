@@ -1,4 +1,4 @@
-0.9.0
+0.9.1
 -----
 - add support for storing http basic auth crendentials (`--skiptTest` option id `add` command)
 
