@@ -5,7 +5,6 @@ const AddTask = require("./tasks/add");
 const RmTask = require("./tasks/rm");
 const LsTask = require("./tasks/ls");
 const ImportTask = require("./tasks/import");
-const updateNotifier = require('update-notifier');
 const pkg = require('../package.json');
 
 const sections = [
@@ -41,6 +40,7 @@ const keypress = async () => {
 }
 
 async function execute() {
+  const updateNotifier = (await import('update-notifier')).default;
   let notifier = updateNotifier({pkg});
   if(notifier.update && process.stdout.isTTY && notifier.update.current != notifier.update.latest){
     notifier.notify({isGlobal: true, defer: false});

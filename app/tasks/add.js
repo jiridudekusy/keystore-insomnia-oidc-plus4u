@@ -1,8 +1,7 @@
 const TaskUtils = require("../misc/task-utils");
 const OidcClient = require("../misc/oidc-client");
 const SecureStoreCliCommon = require("../secure-store-cli-common");
-const { promisify } = require('util');
-const read = promisify(require("read"));
+const read = require("read");
 
 const optionsDefinitions = [
   {
@@ -19,6 +18,14 @@ const optionsDefinitions = [
     multiple: true,
     typeLabel: "{underline alias for the user}",
     description: "Optional alias for the user. The user will be stored under these alias as well. Multiple values supported."
+  },
+  {
+    name: "tags",
+    alias: "t",
+    type: String,
+    multiple: true,
+    typeLabel: "{tags for the user}",
+    description: "Optional tags for the user. Multiple values supported."
   },
   {
     name: "skipTest",

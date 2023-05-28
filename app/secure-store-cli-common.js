@@ -1,5 +1,5 @@
 const {promisify} = require('util');
-const read = promisify(require("read"));
+const read = require("read");
 const secureStore = require("../lib/securestore");
 
 class SecureStoreCliCommon {
